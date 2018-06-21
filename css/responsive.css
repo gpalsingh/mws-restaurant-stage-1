@@ -36,9 +36,39 @@
   }
 }
 
+/* ========= restaurant.html =========== */
+
+/* Show restaurant timings on the right of the image */
+@media screen and (min-width: 550px) {
+  .restaurant-img-container {
+    width: 50%;
+  }
+  .restaurant-info-container {
+    margin-left: 5%;
+    padding: 0 2%;
+    width: calc(40% - 2px);
+    border: 1px solid #aaa;
+    border-radius: 10px;
+  }
+}
+
+/* ====== Common ====== */
 @media screen and (min-width: 1080px) {
-  body {
+  html{
     width: 1080px;
     margin: 0px auto;
+  }
+  .inside header {
+    width: 1080px;
+  }
+  #breadcrumb {
+    width: calc(1080px - 80px);
+  }
+}
+
+@media screen and (max-height: 600px) {
+  .inside #map-container, #map-container {
+    /* Helps scrolling past map in landscape mode*/
+    margin: 2px 44px;
   }
 }
