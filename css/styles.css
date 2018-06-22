@@ -45,6 +45,9 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   width: 100%;
   max-width: 100%;
 }
+.restaurent-main-container {
+  margin-top: 130px;
+}
 #footer {
   background-color: #444;
   color: #aaa;
