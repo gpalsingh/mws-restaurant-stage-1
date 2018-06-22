@@ -1,0 +1,16 @@
+{
+  "name": "mws-restaurant-stage-1",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gpalsingh/mws-restaurant-stage-1.git"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.3",
+    "grunt-contrib-jshint": "^1.1.0",
+    "grunt-contrib-nodeunit": "^2.0.0",
+    "grunt-contrib-uglify": "^3.3.0",
+    "grunt-responsive-images": "^1.10.1"
+  },
+  "dependencies": {}
+}
