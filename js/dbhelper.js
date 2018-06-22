@@ -15,7 +15,7 @@ const altRestaurantTexts = [
   'Restaurant CASA ENRIQUE inside'
 ]
 
-const suffixImage = function (restaurant, suffix) {
+const suffixedImagePath = function (restaurant, suffix) {
   const i = restaurant.photograph.lastIndexOf('.');
   const imgDir ='/img_res'
   const imgName = restaurant.photograph.substring(0, i);
@@ -172,7 +172,7 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img_res/${restaurant.id}-small.jpg`);
+    return (suffixedImagePath(restaurant, '-small'));
   }
 
   /**
@@ -186,17 +186,24 @@ class DBHelper {
    * Restaurant image srcset.
    */
   static imageSrcsetForRestaurant(restaurant) {
-    return `${suffixImage(restaurant, '-large-2x')} 1600w,
-      ${suffixImage(restaurant, '-large-1x')} 800w,
-      ${suffixImage(restaurant, '-medium')} 700w,
-      ${suffixImage(restaurant, '-small')} 500w`
+    return `${suffixedImagePath(restaurant, '-large-2x')} 1600w,
+      ${suffixedImagePath(restaurant, '-large-1x')} 800w,
+      ${suffixedImagePath(restaurant, '-medium')} 700w,
+      ${suffixedImagePath(restaurant, '-small')} 500w`
   }
 
   /**
    * Restaurant image sizes for homepage.
    */
   static imageSizesForRestaurantHome(restaurant) {
-    return `(min-width: 880px) 34vw, (min-width: 550px) 50vw, 100vw`
+    return `(min-width: 880px) 34vw, (min-width: 550px) 50vw, 90vw`
+  }
+
+  /**
+   * Restaurant image sizes for restraunt details page.
+   */
+  static imageSizesForRestaurantDetails(restaurant) {
+    return `(min-width: 550px) 50vw, 90vw`
   }
 
   /**
