@@ -1,6 +1,28 @@
 /**
  * Common database helper functions.
  */
+const altRestaurantTexts = [
+  '',
+  'Restaurant mission chinese food inside view',
+  'Restaurant emily dish sample',
+  'Restaurant KANG HO DONG BAEKJEONG inside view',
+  'Restaurant KATZ\'S DELICATESSEN outside view',
+  'Restaurant ROBERTA\'S PIZZA inside view',
+  'Restaurant HOMETOWN BBQ inside view',
+  'Restaurant SUPERIORITY BURGER entrance',
+  'Restaurant THE DUTCH outside',
+  'Restaurant MU RAMEN inside',
+  'Restaurant CASA ENRIQUE inside'
+]
+
+const suffixImage = function (restaurant, suffix) {
+  const i = restaurant.photograph.lastIndexOf('.');
+  const imgDir ='/img_res'
+  const imgName = restaurant.photograph.substring(0, i);
+  const imgExt = restaurant.photograph.substring(i+1);
+  return `${imgDir}/${imgName}${suffix}.${imgExt}`;
+}
+
 class DBHelper {
 
   /**
@@ -150,14 +172,38 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    return (`/img_res/${restaurant.id}-small.jpg`);
+  }
+
+  /**
+   * Restaurant image alt tag.
+   */
+  static imageAltForRestaurant(restaurant) {
+    return altRestaurantTexts[restaurant.id];
+  }
+
+  /**
+   * Restaurant image srcset.
+   */
+  static imageSrcsetForRestaurant(restaurant) {
+    return `${suffixImage(restaurant, '-large-2x')} 1600w,
+      ${suffixImage(restaurant, '-large-1x')} 800w,
+      ${suffixImage(restaurant, '-medium')} 700w,
+      ${suffixImage(restaurant, '-small')} 500w`
+  }
+
+  /**
+   * Restaurant image sizes for homepage.
+   */
+  static imageSizesForRestaurantHome(restaurant) {
+    return `(min-width: 880px) 34vw, (min-width: 550px) 50vw, 100vw`
   }
 
   /**
    * Map marker for a restaurant.
    */
    static mapMarkerForRestaurant(restaurant, map) {
-    // https://leafletjs.com/reference-1.3.0.html#marker  
+    // https://leafletjs.com/reference-1.3.0.html#marker
     const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
       {title: restaurant.name,
       alt: restaurant.name,
@@ -165,7 +211,7 @@ class DBHelper {
       })
       marker.addTo(newMap);
     return marker;
-  } 
+  }
   /* static mapMarkerForRestaurant(restaurant, map) {
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
