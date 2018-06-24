@@ -160,6 +160,8 @@ nav h1 a {
   padding: 0 1% 25px;
   text-align: left;
   width: 100%;
+  display: flex;
+  flex-flow: column wrap;
 }
 #restaurants-list .restaurant-img {
   background-color: #ccc;
@@ -182,6 +184,7 @@ nav h1 a {
 #restaurants-list p {
   margin: 0;
   font-size: 11pt;
+  margin: auto 0px;
 }
 #restaurants-list li a {
   background-color: orange;
