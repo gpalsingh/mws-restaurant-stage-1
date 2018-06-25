@@ -326,6 +326,7 @@ nav h1 a {
   padding: 0;
 }
 .review-container {
+  width: 100%;
   background-color: #fff;
   border: 2px solid #f3f3f3;
   border-radius: 20px 0;
@@ -336,7 +337,6 @@ nav h1 a {
   overflow: hidden;
   padding: 0 0px 20px;
   position: relative;
-  width: calc(100% - 40px);;
 }
 .review-container:last-child {
   margin: 0px;
