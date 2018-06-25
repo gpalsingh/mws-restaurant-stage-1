@@ -2,7 +2,6 @@
   /* ====================== Restaurant Filtering ====================== */
   .filter-options > select {
     width: 44%;
-    margin-top: 10px;
   }
   .filter-options > select:nth-child(2) {
     margin-left: 4%;
@@ -49,6 +48,9 @@
     width: calc(40% - 2px);
     border: 1px solid #aaa;
     border-radius: 10px;
+  }
+  #restaurant-cuisine {
+    margin: 0;
   }
 }
 

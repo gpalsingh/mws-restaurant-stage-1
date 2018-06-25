@@ -166,6 +166,7 @@ createRestaurantHTML = (restaurant) => {
   image.alt = DBHelper.imageAltForRestaurant(restaurant);
   image.setAttribute('srcset',DBHelper.imageSrcsetForRestaurant(restaurant));
   image.setAttribute('sizes', DBHelper.imageSizesForRestaurantHome(restaurant));
+  image.setAttribute('tabindex', '0');
   li.append(image);
 
   const name = document.createElement('h1');
@@ -174,10 +175,12 @@ createRestaurantHTML = (restaurant) => {
 
   const neighborhood = document.createElement('p');
   neighborhood.innerHTML = restaurant.neighborhood;
+  neighborhood.setAttribute('tabindex', '0');
   li.append(neighborhood);
 
   const address = document.createElement('p');
   address.innerHTML = restaurant.address;
+  address.setAttribute('tabindex', '0');
   li.append(address);
 
   const more = document.createElement('a');
