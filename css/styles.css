@@ -371,6 +371,7 @@ nav h1 a {
   background-color: orange;
   font-weight: bold;
   margin: 0 0 0 20px;
+  max-height: 27px;
 }
 
 .review-comment {
