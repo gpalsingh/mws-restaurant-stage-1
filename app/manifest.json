@@ -1,0 +1,39 @@
+{
+  "background_color": "#fdfdfd",
+  "description": "App to help you find the right restaurant",
+  "dir": "ltr",
+  "lang": "en-US",
+  "display": "standalone",
+  "name": "Restaurant Reviews",
+  "orientation": "portrait-primary",
+  "short_name": "Reviews",
+  "theme_color": "aliceblue",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+  {
+    "src": "icon/restaurant-48.png",
+    "sizes": "48x48",
+    "type": "image/png"
+  },
+  {
+    "src": "icon/restaurant-72.png",
+    "sizes": "72x72",
+    "type": "image/png"
+  },
+  {
+    "src": "icon/restaurant-96.png",
+    "sizes": "96x96",
+    "type": "image/png"
+  },
+  {
+    "src": "icon/restaurant-128.png",
+    "sizes": "128x128",
+    "type": "image/png"
+  },
+  {
+    "src": "icon/restaurant.png",
+    "sizes": "256x256",
+    "type": "image/png"
+  }],
+}
