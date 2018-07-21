@@ -8,8 +8,7 @@
   "orientation": "portrait-primary",
   "short_name": "Reviews",
   "theme_color": "aliceblue",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "index.html",
   "icons": [
   {
     "src": "icon/restaurant-48.png",
@@ -35,5 +34,9 @@
     "src": "icon/restaurant.png",
     "sizes": "256x256",
     "type": "image/png"
-  }],
+  }, {
+    "src": "icon/restaurant-512.png",
+    "sizes": "512x512",
+    "type": "image/png"
+  }]
 }

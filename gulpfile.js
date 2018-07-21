@@ -141,6 +141,11 @@ gulp.task('responsive-icons', () => {
         width: 128,
         rename: {suffix: '-128'},
       }, {
+        width: 512,
+        rename: {suffix: '-512'},
+        withoutEnlargement: false,
+      },
+      {
         quality: 50,
         withMetadata: false,
       }]
