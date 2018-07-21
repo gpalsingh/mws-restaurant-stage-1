@@ -59,7 +59,7 @@
       "sourceType": "module"
     }
   },
-    "scripts": {
+  "scripts": {
     "serve": "gulp serve:dist"
   }
 }
