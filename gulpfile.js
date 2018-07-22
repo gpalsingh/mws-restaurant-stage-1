@@ -91,17 +91,11 @@ gulp.task('html', ['styles', 'scripts', 'sw'], () => {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('copy-images', () => {
-  return gulp.src('app/images/responsive/**/*')
-    .pipe($.cache($.imagemin()))
-    .pipe(gulp.dest('dist/images'));
-});
-
-gulp.task('responsive-images', () => {
+gulp.task('images', ['responsive-icons'], () => {
   //Delete old processed images
   del.sync(['app/images/responsive/*.jpg', '!app/images/responsive']);
   //Create new processed images
-  return gulp.src('app/images/original/*')
+  return gulp.src('app/images/**/*')
     .pipe(responsive({
       '*.jpg': [{
         width: 800,
@@ -122,7 +116,8 @@ gulp.task('responsive-images', () => {
       progressive: true,
       withMetadata: false,
     }))
-    .pipe(gulp.dest('app/images/responsive'));
+    .pipe($.cache($.imagemin([], {})))
+    .pipe(gulp.dest('dist/images'));
 });
 
 gulp.task('responsive-icons', () => {
@@ -152,10 +147,6 @@ gulp.task('responsive-icons', () => {
     }))
     .pipe(gulp.dest('dist/icon'));
 });
-
-gulp.task('images', ['responsive-icons'], () => {
-  runSequence('responsive-images', 'copy-images');
-})
 
 gulp.task('fonts', () => {
   return gulp.src(require('main-bower-files')('**/*.{eot,svg,ttf,woff,woff2}', function (err) {})
