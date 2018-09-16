@@ -37,7 +37,7 @@
 
 /* ========= restaurant.html =========== */
 
-/* Show restaurant timings on the right of the image */
+/* Show restaurant timings and form fields on the right side */
 @media screen and (min-width: 550px) {
   .restaurant-img-container {
     width: 50%;
@@ -51,6 +51,12 @@
   }
   #restaurant-cuisine {
     margin: 0;
+  }
+  .review-form-label {
+    width: 30%;
+  }
+  .field-container {
+    display: flex;
   }
 }
 
