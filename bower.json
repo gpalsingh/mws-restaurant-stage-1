@@ -1,5 +1,5 @@
 {
-  "name": "test-yeoman",
+  "name": "restaurant-reviews",
   "private": true,
   "dependencies": {
     "jquery": "~2.1.1",
@@ -8,5 +8,19 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "mocha": "^5.2.0"
-  }
+  },
+  "homepage": "https://github.com/gpalsingh/mws-restaurant-stage-1",
+  "authors": [
+    "Gurkirpal <gurkirpal204@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }

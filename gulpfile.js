@@ -28,15 +28,28 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-gulp.task('scripts', () => {
-  return gulp.src('app/scripts/**/*.js')
+gulp.task('scripts', ['commonjs'],() => {
+  return gulp.src(['app/scripts/**/*.js', '!app/scripts/common.js'])
     .pipe($.plumber())
     .pipe($.if(dev, $.sourcemaps.init()))
     .pipe($.babel())
-    .pipe($.uglify({compress: {drop_console: true}}))
+    //.pipe($.uglify({compress: {drop_console: true}}))
     .pipe($.if(dev, $.sourcemaps.write('.')))
     .pipe(gulp.dest('dist/js'))
     .pipe(reload({stream: true}));
+});
+
+gulp.task('commonjs', () => {
+  const options = {
+    entries: ['app/scripts/common.js'],
+    debug: true
+  };
+  return browserify(options)
+    .transform(babelify.configure({presets: ['es2015']}))
+    .bundle()
+    .pipe(source('common.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('sw', () => {
@@ -46,11 +59,12 @@ gulp.task('sw', () => {
   };
   return browserify(options)
     .transform(babelify.configure({presets: ['es2015']}))
+    .require('./app/scripts/common.js')
     .bundle()
     .pipe(source('sw.js'))
     .pipe(buffer())
     .pipe(gulp.dest('dist'));
-})
+});
 
 function lint(files) {
   return gulp.src(files)
@@ -76,12 +90,12 @@ gulp.task('lint:test', () => {
 gulp.task('html', ['styles', 'scripts', 'sw'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    .pipe($.if(/\.js$/, $.uglify({compress: {drop_console: true}})))
+    //.pipe($.if(/\.js$/, $.uglify({compress: {drop_console: false}})))
     .pipe($.if(/\.css$/, $.cssnano({safe: true, autoprefixer: false})))
     .pipe($.if(/\.html$/, $.htmlmin({
       collapseWhitespace: true,
       minifyCSS: true,
-      minifyJS: {compress: {drop_console: true}},
+      //minifyJS: {compress: {drop_console: false}},
       processConditionalComments: true,
       removeComments: true,
       removeEmptyAttributes: true,

@@ -83,6 +83,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
+  const fav = document.getElementById('button-fav');
+  window.Common.createFavButton(fav, restaurant.is_favorite, restaurant.id);
+
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
 

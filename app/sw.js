@@ -1,20 +1,4 @@
-import idb from 'idb';
-
-const staticCacheName = 'mws-rest1-static-v3';
-const serverPort = '1337';
-
-const dbPromise = idb.open('rest-reviews-store', 1, upgradeDB => {
-  switch(upgradeDB.oldVersion) {
-    case 0:
-      const teststore = upgradeDB.createObjectStore(
-        'rest-reviews-json',
-        {
-          keyPath: 'id',
-        }
-      );
-  }
-}).catch(er => console.log(`Failed to create dbPromise(${er})`));
-
+const staticCacheName = 'mws-rest1-static-v4';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -43,42 +27,20 @@ self.addEventListener('activate', function(event) {
   );
 });
 
-const handleApiRequest = requestUrl => {
-  /* Get the key. Either id or -1 */
-  let restId = requestUrl.href.split('/').slice(-1)[0];
-  restId = restId == 'restaurants' ? -1 : restId;
-  /* Check IDB cache */
-  return dbPromise.then(db => {
-    const tx = db.transaction('rest-reviews-json');
-    const obStore = tx.objectStore('rest-reviews-json');
-    return obStore.get(restId).then(cachedResponse => {
-      /* Return cached response if available */
-      if (cachedResponse) return cachedResponse.data;
-      /* Fetch response instead */
-      return fetch(requestUrl).then(response => {
-        return response.json();
-      }).then(resJson => {
-        /* Cache fetched JSON */
-        db.transaction('rest-reviews-json', 'readwrite').objectStore('rest-reviews-json')
-        .put({
-          id: restId,
-          data: resJson
-        });
-        /* Return fetched response */
-        return resJson;
-      });
-    }).then(resJson => {
-      /* event.respondWith expects Response object */
-      return new Response(JSON.stringify(resJson));
-    });
-  });
-}
-
 self.addEventListener('fetch', function(event) {
+  /* Cache only GET requests */
+  if (event.request.method != 'GET') {
+    event.respondWith(
+      fetch(event.request)
+    );
+    return;
+  }
+  
   var requestUrl = new URL(event.request.url);
   /* Use IDB cache for requests to server */
-  if (requestUrl.port == serverPort) {
-    event.respondWith(handleApiRequest(requestUrl));
+  if (requestUrl.port == window.Common.serverPort) {
+    console.log(requestUrl);
+    event.respondWith(window.Common.handleApiRequest(requestUrl, event.request.method));
     return;
   }
   /* Handle normal requests like usual */
