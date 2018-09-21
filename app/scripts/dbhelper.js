@@ -27,19 +27,41 @@ const suffixedImagePath = function (restaurant, suffix) {
 class DBHelper {
 
   /**
+   * Database server port number.
+   */
+  static get PORT() { return 1337; }
+
+  /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
    */
-  static get DATABASE_URL() {
-    const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+  static get ALL_RESTAURANTS_URL() {
+    return `http://localhost:${DBHelper.PORT}/restaurants`;
+  }
+
+  static reviewsByRestaurantIdUrl(id) {
+    return `http://localhost:${DBHelper.PORT}/reviews?restaurant_id=${id}`;
+  }
+
+  /**
+   * Fetch a all reviews for a restaurant.
+   */
+  static fetchReviewsByRestaurantId(id, callback) {
+    Common.handleApiRequest(new URL(DBHelper.reviewsByRestaurantIdUrl(id)))
+    .then((response) => {
+      return response.json();
+    }).then((reviews) => {
+      callback(null, reviews);
+    }).catch((error) => {
+      callback(error, null);
+    });
   }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    Common.handleApiRequest(new URL(DBHelper.DATABASE_URL)).then((response) => {
+    Common.handleApiRequest(new URL(DBHelper.ALL_RESTAURANTS_URL)).then((response) => {
         // Got a success response from server!
         return response.json();
       }).then((restaurants) => {
