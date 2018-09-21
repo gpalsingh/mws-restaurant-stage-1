@@ -38,9 +38,8 @@ self.addEventListener('fetch', function(event) {
   
   var requestUrl = new URL(event.request.url);
   /* Use IDB cache for requests to server */
-  if (requestUrl.port == window.Common.serverPort) {
-    console.log(requestUrl);
-    event.respondWith(window.Common.handleApiRequest(requestUrl, event.request.method));
+  if (requestUrl.port == Common.serverPort) {
+    event.respondWith(Common.handleApiRequest(requestUrl));
     return;
   }
   /* Handle normal requests like usual */

@@ -39,7 +39,7 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL).then((response) => {
+    Common.handleApiRequest(new URL(DBHelper.DATABASE_URL)).then((response) => {
         // Got a success response from server!
         return response.json();
       }).then((restaurants) => {

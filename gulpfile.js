@@ -6,12 +6,13 @@ const del = require('del');
 const wiredep = require('wiredep').stream;
 const runSequence = require('run-sequence');
 const responsive = require('gulp-responsive');
-const browserify = require('browserify');
-const babelify = require('babelify');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const log = require('fancy-log');
-var ico = require('gulp-to-ico');
+const es = require('event-stream');
+const rename = require('gulp-rename');
+const concat = require('gulp-concat');
+const ico = require('gulp-to-ico');
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -28,9 +29,9 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-gulp.task('scripts', ['commonjs'],() => {
-  return gulp.src(['app/scripts/**/*.js', '!app/scripts/common.js'])
-    .pipe($.plumber())
+gulp.task('scripts', () => {
+  return gulp.src('app/scripts/**/*.js')
+    //.pipe($.plumber())
     .pipe($.if(dev, $.sourcemaps.init()))
     .pipe($.babel())
     //.pipe($.uglify({compress: {drop_console: true}}))
@@ -39,31 +40,14 @@ gulp.task('scripts', ['commonjs'],() => {
     .pipe(reload({stream: true}));
 });
 
-gulp.task('commonjs', () => {
-  const options = {
-    entries: ['app/scripts/common.js'],
-    debug: true
-  };
-  return browserify(options)
-    .transform(babelify.configure({presets: ['es2015']}))
-    .bundle()
-    .pipe(source('common.js'))
-    .pipe(buffer())
-    .pipe(gulp.dest('dist/js'));
-});
-
 gulp.task('sw', () => {
-  const options = {
-    entries: ['app/sw.js'],
-    debug: true
-  };
-  return browserify(options)
-    .transform(babelify.configure({presets: ['es2015']}))
-    .require('./app/scripts/common.js')
-    .bundle()
-    .pipe(source('sw.js'))
-    .pipe(buffer())
-    .pipe(gulp.dest('dist'));
+  return gulp.src(['app/scripts/lib/idb.js', 'app/scripts/common.js', 'app/sw.js'])
+    .pipe(concat('sw.js'))
+    //.pipe($.plumber())
+    .pipe($.babel())
+    //.pipe($.uglify({compress: {drop_console: true}}))
+    .pipe(gulp.dest('dist'))
+    .pipe(reload({stream: true}));
 });
 
 function lint(files) {
@@ -220,7 +204,7 @@ gulp.task('serve:dist', ['default'], () => {
   gulp.watch('app/images/original/**/*', ['images']).on('change', reload);
   gulp.watch('app/styles/**/*.css', ['styles']);
   gulp.watch('app/scripts/**/*.js', ['scripts']);
-  gulp.watch('app/sw.js', ['sw']);
+  gulp.watch(['app/sw.js', 'app/scripts/common.js'], ['sw']);
   gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('bower.json', ['wiredep', 'fonts']);
 });

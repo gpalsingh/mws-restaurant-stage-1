@@ -177,7 +177,7 @@ const createRestaurantHTML = (restaurant) => {
   //create favorite button
   const fav = document.createElement('div');
   fav.innerHTML = '🖤';
-  window.Common.createFavButton(fav, restaurant.is_favorite, restaurant.id);
+  Common.createFavButton(fav, restaurant.is_favorite, restaurant.id);
   //put name and favorite button together
   const nameFavDiv = document.createElement('div');
   nameFavDiv.setAttribute('class', 'name-fav-div');
