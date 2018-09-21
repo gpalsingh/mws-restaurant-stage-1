@@ -63,9 +63,6 @@ gulp.task('lint', () => {
     .pipe(gulp.dest('app/scripts'));
 });
 
-gulp.task('lint-sw', () => {
-  return lint('app/sw.js').pipe(gulp.dest('app'));
-})
 gulp.task('lint:test', () => {
   return lint('test/spec/**/*.js')
     .pipe(gulp.dest('test/spec'));
@@ -237,7 +234,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'lint-sw', 'html', 'images', 'fonts', 'extras'], () => {
+gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build'}));
 });
 
