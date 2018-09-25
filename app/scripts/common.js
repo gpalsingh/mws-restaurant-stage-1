@@ -190,6 +190,7 @@ class Common {
     const isFav = JSON.parse(isFavField);
     const checkClass = isFav ? 'fav-button-checked' : 'fav-button-not-checked';
     el.setAttribute('class', `fav-button ${checkClass}`);
+    el.setAttribute('aria-role', 'button');
     //Accessibility
     el.setAttribute('role', 'button');
     const ariaText = isFav ? 'Mark not favorite' : 'Mark favorite';
