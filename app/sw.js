@@ -36,8 +36,7 @@ self.addEventListener('fetch', function(event) {
       fetch(event.request).catch(err => {
         console.log('Failed to fetch non GET request');
         return new Response(
-          `sw.js not caching ${event.request.method} requests`,
-          {status: 503}
+          `sw.js not caching ${event.request.method} requests`
         );
       })
     );
@@ -66,7 +65,7 @@ self.addEventListener('fetch', function(event) {
         })
       }).catch(err => {
         console.log('Assuming user is offline');
-        return new Response('Page not cached for offline use', {status: 503});
+        return new Response('Page not cached for offline use');
       });
     })
   );
