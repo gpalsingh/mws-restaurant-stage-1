@@ -253,7 +253,6 @@ class Common {
     el.setAttribute('class', `fav-button ${checkClass}`);
     //Accessibility
     el.setAttribute('role', 'button');
-    //el.setAttribute('aria-role', 'button');
     el.setAttribute('aria-label', 'Add restaurant to favorites');
     el.setAttribute('aria-pressed', ariaPressed);
     el.setAttribute('tabindex', '0');
