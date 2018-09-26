@@ -37,6 +37,11 @@ initMap = () => {
       }).addTo(newMap);
       fillBreadcrumb();
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.newMap);
+      //Make add restaurants form functional
+      makeFormFucntional();
+      //Upload pending reviews
+      window.addEventListener('online', uploadPendingReviews);
+      uploadPendingReviews();
     });
   });
 }
@@ -58,6 +63,84 @@ initMap = () => {
 } */
 
 /**
+ * Make add restaurants form functional.
+ */
+ makeFormFucntional = () => {
+  form = document.getElementById('new-review-form');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    //Get data to post
+    const rid = getParameterByName('id');
+    const rname = document.getElementById('review-name-label').value;
+    const rating = document.getElementById('review-rating').value;
+    const comments = document.getElementById('review-comments').value;
+    postData = {
+      'restaurant_id': parseInt(rid),
+      'name': rname,
+      'rating': parseInt(rating),
+      'comments': comments
+    };
+    //Send data
+    Common.handleApiRequest('http://localhost:1337/reviews/',
+                            'POST',
+                            postData);
+  });
+ }
+
+ /**
+ * Upload pending reviews. Mark reviews uploaded on the page too.
+ */
+uploadPendingReviews = () => {
+  //Try to upload only if we're online
+  if (!navigator.onLine) return;
+  if (!self.restaurant) return;
+
+  const restId = self.restaurant.id;
+
+  Common.dbPromise.then(db => {
+    const tx = db.transaction(Common.OFFLINE_REVIEWS_STORE);
+    tx.objectStore(Common.OFFLINE_REVIEWS_STORE).getAll().then(reviews => {
+      reviews.forEach(review => {
+        //Upload to server
+        postData = {
+          'restaurant_id': review.restaurant_id,
+          'name': review.name,
+          'rating': review.rating,
+          'comments': review.comments
+        }
+        Common.handleApiRequest('http://localhost:1337/reviews', 'POST', postData, true)
+          .then((resJson) => {
+          if (review.restaurant_id == restId) {
+            //Update the html if review is visible on current page
+            const reviewDate = document.getElementById('pending-review-date-' + review.id);
+            reviewDate.innerHTML = new Date(resJson.updatedAt).toDateString();
+          }
+          //Remove the review from database
+          db.transaction(Common.OFFLINE_REVIEWS_STORE, 'readwrite')
+            .objectStore(Common.OFFLINE_REVIEWS_STORE)
+            .delete(review.id);
+        });
+      });
+    });
+  });
+}
+
+/**
+ * Get pending reviews for this restaurant from idb
+ */
+getPendingReviews = (restaurant_id) => {
+  return Common.dbPromise.then(db => {
+    const tx = db.transaction(Common.OFFLINE_REVIEWS_STORE);
+    const pendingRevStore = tx.objectStore(Common.OFFLINE_REVIEWS_STORE);
+    var restIdIndex = pendingRevStore.index('restId');
+
+    return restIdIndex.getAll(restaurant_id);
+  }).then(reviews => {
+    self.pendingReviews = reviews;
+  });
+}
+
+/**
  * Get current restaurant from page URL.
  */
 fetchReviewsFromURL = (callback) => {
@@ -66,6 +149,7 @@ fetchReviewsFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error);
   } else {
+    getPendingReviews(id);
     DBHelper.fetchReviewsByRestaurantId(id, (error, reviews) => {
       self.reviews = reviews;
       fillReviewsHTML();
@@ -148,13 +232,14 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  * Create all reviews HTML and add them to the webpage.
  */
 fillReviewsHTML = (reviews = self.reviews) => {
+  const pendingReviews = self.pendingReviews;
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   title.setAttribute('tabindex', '0');
   container.appendChild(title);
 
-  if (!reviews) {
+  if (!reviews && !pendingReviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
     noReviews.setAttribute('tabindex', '0');
@@ -162,16 +247,27 @@ fillReviewsHTML = (reviews = self.reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
+  if (reviews) {
+    reviews.forEach(review => {
+      /**
+       * We get reviews in oldest first order
+       * Stack the reviews on top of each other to show latest first
+       */
+      ul.insertBefore(createReviewHTML(review), ul.childNodes[0]);
+    });
+  }
+  if (pendingReviews.length > 0) {
+    pendingReviews.forEach(review => {
+      ul.insertBefore(createReviewHTML(review, true), ul.childNodes[0]);
+    });
+  }
   container.appendChild(ul);
 }
 
 /**
  * Create review HTML and add it to the webpage.
  */
-createReviewHTML = (review) => {
+createReviewHTML = (review, pending=false) => {
   const li = document.createElement('li');
   li.className = 'review-container';
   const name = document.createElement('p');
@@ -181,7 +277,12 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = new Date(review.updatedAt).toDateString();
+  if (pending) {
+    date.innerHTML = 'PENDING UPLOAD';
+    date.setAttribute('id', 'pending-review-date-' + review.id);
+  } else {
+    date.innerHTML = new Date(review.updatedAt).toDateString();
+  }
   date.className = 'review-date';
   date.setAttribute('tabindex', '0');
   li.appendChild(date);
@@ -217,6 +318,9 @@ fillBreadcrumb = (restaurant=self.restaurant) => {
 getParameterByName = (name, url) => {
   if (!url)
     url = window.location.href;
+  if ((name == 'id') && (self.restaurant)) {
+    return self.restaurant.id;
+  }
   name = name.replace(/[\[\]]/g, '\\$&');
   const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
     results = regex.exec(url);

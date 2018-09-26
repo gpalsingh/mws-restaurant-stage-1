@@ -47,7 +47,7 @@ class DBHelper {
    * Fetch a all reviews for a restaurant.
    */
   static fetchReviewsByRestaurantId(id, callback) {
-    Common.handleApiRequest(new URL(DBHelper.reviewsByRestaurantIdUrl(id)))
+    Common.handleApiRequest(DBHelper.reviewsByRestaurantIdUrl(id))
     .then((response) => {
       return response.json();
     }).then((reviews) => {

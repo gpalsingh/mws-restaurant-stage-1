@@ -5,9 +5,10 @@ class Common {
   static get serverPort() { return '1337' }
   static get OBJ_STORE_NAME() { return 'rest-reviews-json' }
   static get FLAG_STORE_NAME() { return 'rest-reviews-flags' }
+  static get OFFLINE_REVIEWS_STORE() { return 'rest-offline-reviews' }
 
   static get dbPromise() {
-    return idb.open('rest-reviews-store', 2, upgradeDB => {
+    return idb.open('rest-reviews-store', 3, upgradeDB => {
     switch(upgradeDB.oldVersion) {
       case 0:
         const teststore = upgradeDB.createObjectStore(
@@ -23,25 +24,35 @@ class Common {
             keyPath: 'id',
           }
         );
+      case 2:
+        const offlinestore = upgradeDB.createObjectStore(
+          Common.OFFLINE_REVIEWS_STORE,
+          {
+            keyPath: 'id',
+            autoIncrement: true
+          }
+        );
+        offlinestore.createIndex('restId', 'restaurant_id');
     }
     }).catch(er => console.log(`Failed to create dbPromise(${er})`));
   }
 
-  static urlToKey(url) {
-   const base = url.pathname.split('/').join('') || '-1';
-   if (base.match(/^\w+\d+$/)) {
-    return base; //No need to look at params if we got id
-   }
-   const id = url.searchParams.get('restaurant_id');
-   if (id) {
-    return base + 'restaurant_id' + id;
-   }
-   const fav = url.searchParams.get('is_favorite');
-   if (fav) {
-    return base + 'is_favorite';
-   }
-   return base;
-  }
+  static urlToKey(rawUrl) {
+    const url = new URL(rawUrl);
+    const base = url.pathname.split('/').join('') || '-1';
+    if (base.match(/^\w+\d+$/)) {
+      return base; //No need to look at params if we got id
+    }
+    const id = url.searchParams.get('restaurant_id');
+    if (id) {
+      return base + 'restaurant_id' + id;
+    }
+    const fav = url.searchParams.get('is_favorite');
+    if (fav) {
+      return base + 'is_favorite';
+    }
+      return base;
+    }
 
   static markKeysStale(keys, val=true) {
     return Common.dbPromise.then(db => {
@@ -75,7 +86,15 @@ class Common {
     Common.markKeysStale([key], false); //Mark keys as updated now
   }
 
-  static handleGetRequest(url, db, objStore, key) {
+  static storeReview(db, data) {
+    return db.transaction(Common.OFFLINE_REVIEWS_STORE, 'readwrite')
+    .objectStore(Common.OFFLINE_REVIEWS_STORE)
+    .put(data);
+  }
+
+  static handleGetRequest(url, db, key) {
+    const tx = db.transaction(Common.OBJ_STORE_NAME);
+    const objStore = tx.objectStore(Common.OBJ_STORE_NAME);
     return objStore.get(key).then(cachedResponse => {
       /* Return cached response if available 
          Defer updating data until asked for it */
@@ -113,7 +132,7 @@ class Common {
     });
   }
 
-  static handlePutRequest(url, db, objStore, key, jsonData) {
+  static handlePutRequest(url, db, key, jsonData) {
     let options = { method: 'PUT'}
     if (jsonData) {
       options.body = JSON.stringify(jsonData)
@@ -142,16 +161,57 @@ class Common {
     });
   }
 
-  static handleApiRequest(url, method='GET') {
-    const key = Common.urlToKey(url);
+  static handlePostRequest(url, data, db) {
+    const postData = JSON.stringify(data);
+    const options = {
+      method: 'POST',
+      body: postData,
+    }
+    //Try creating new review
+    return fetch(url, options).then(response => {
+      if (!response) {
+        console.error('POST response was null');
+        return false;
+      }
+      return response.json();
+    }).then(resJson => {
+      if (!resJson) {
+        return false;
+      }
+      //Create key now that we have the id
+      const id = resJson.id;
+      const key = Common.urlToKey(`http://localhost:1337/reviews/${id}`);
+      //Cache the data for newly created review
+      Common.storeKeyVal(db, key, resJson);
+      //Only one stale keys because review never existed
+      Common.markKeysStale(['reviews']);
+      return resJson;
+    }).catch(err => {
+      console.log('Saving review to upload later');
+      console.error(err);
+      Common.storeReview(db, data);
+      return false;
+    });
+  }
+
+  static handleApiRequest(rawUrl, method='GET', data=null, backgroundTask=false) {
+    const url = new URL(rawUrl);
+    const key = Common.urlToKey(url);;
     /* Check IDB cache */
     return Common.dbPromise.then(db => {
-      const tx = db.transaction(Common.OBJ_STORE_NAME);
-      const objStore = tx.objectStore(Common.OBJ_STORE_NAME);
       if (method == 'PUT') {
-        return Common.handlePutRequest(url, db, objStore, key);
+        return Common.handlePutRequest(url, db, key);
       }
-      return Common.handleGetRequest(url, db, objStore, key);
+      if (method == 'GET') {
+        return Common.handleGetRequest(url, db, key);
+      }
+      if (method == 'POST') {
+        const postPromise = Common.handlePostRequest(url, data, db);
+        if (backgroundTask) return postPromise;
+        postPromise.then(success => {window.location.reload()});
+        return;
+      }
+      console.error(`method ${method} not supported yet`);
     });
   }
 
@@ -159,20 +219,22 @@ class Common {
    * Favorite buttons
    */ 
 
-  static toggleFavButton(el) {
+  static toggleFavButton(el, isFav) {
     el.classList.toggle('fav-button-not-checked');
     el.classList.toggle('fav-button-checked');
-  }
-
-  static toggleFavLable(el, wasFav) {
-    if (wasFav) {
-      el.setAttribute('aria-label', 'Mark not favorite');
+    if (isFav) {
+      el.setAttribute('aria-pressed', 'true')
       return;
     }
-    el.setAttribute('aria-label', 'Mark favorite');
+    el.setAttribute('aria-pressed', 'false');
   }
 
   static handleFavButtonClick(event) {
+    if (event.key) { //Keyboard event
+      //Catch only spacebar and enter keys
+      if ((event.key != " ") && (event.key != "Enter")) return;
+      event.preventDefault();
+    }
     const favButton = event.target || event.srcElement;
     const id = favButton.getAttribute('data-id');
     const wasFav = favButton.classList.contains('fav-button-checked');
@@ -180,24 +242,24 @@ class Common {
     //Try to send message to server
     const url = new URL(`http://localhost:${Common.serverPort}/restaurants/${id}/?is_favorite=${newState}`);
     //Switch appearance if succeeded
-    Common.handleApiRequest(url, 'PUT').isFul
-    Common.toggleFavButton(favButton);
-    Common.toggleFavLable(favButton, wasFav);
-
+    Common.handleApiRequest(url, 'PUT');
+    Common.toggleFavButton(favButton, newState);
   }
 
   static createFavButton(el, isFavField, id) {
     const isFav = JSON.parse(isFavField);
     const checkClass = isFav ? 'fav-button-checked' : 'fav-button-not-checked';
+    const ariaPressed = isFav ? 'true' : 'false';
     el.setAttribute('class', `fav-button ${checkClass}`);
-    el.setAttribute('aria-role', 'button');
     //Accessibility
     el.setAttribute('role', 'button');
-    const ariaText = isFav ? 'Mark not favorite' : 'Mark favorite';
-    el.setAttribute('aria-label', ariaText);
+    //el.setAttribute('aria-role', 'button');
+    el.setAttribute('aria-label', 'Add restaurant to favorites');
+    el.setAttribute('aria-pressed', ariaPressed);
     el.setAttribute('tabindex', '0');
-    //Make button clickable
+    //Make button clickable and accessible
     el.addEventListener('click', Common.handleFavButtonClick);
+    el.addEventListener('keypress', Common.handleFavButtonClick);
     //Associate button with restaurant
     el.setAttribute('data-id', id);
   }

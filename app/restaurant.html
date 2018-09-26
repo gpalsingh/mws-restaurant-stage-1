@@ -1,5 +1,5 @@
-<!DOCTYPE html lang="en-US">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
   <!-- Normalize.css for better cross-browser consistency -->
@@ -77,8 +77,8 @@
             </select>
           </div>
           <div class="field-container">
-            <label class="review-form-label" for="review-comments">Thoughts:</label>
-            <textarea name="comments" id="review-comments" cols=40 rows=5 required></textarea>
+            <label class="review-form-label" for="review-comments">Thoughts (max 300 characters):</label>
+            <textarea name="comments" id="review-comments" maxlength="300" cols=40 rows=5 required></textarea>
           </div>
           <div class="submit-container">
             <input type="submit" value="Submit" id="submit-review">

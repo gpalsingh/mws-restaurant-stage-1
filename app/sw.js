@@ -28,20 +28,28 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  var requestUrl = new URL(event.request.url);
+
   /* Cache only GET requests */
   if (event.request.method != 'GET') {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request).catch(err => {
+        console.log('Failed to fetch non GET request');
+        return new Response(
+          `sw.js not caching ${event.request.method} requests`,
+          {status: 503}
+        );
+      })
     );
     return;
   }
-  
-  var requestUrl = new URL(event.request.url);
+
   /* Use IDB cache for requests to server */
   if (requestUrl.port == Common.serverPort) {
     event.respondWith(Common.handleApiRequest(requestUrl));
     return;
   }
+  
   /* Handle normal requests like usual */
   event.respondWith(
     caches.match(event.request).then(function(cachedResponse) {
@@ -56,6 +64,9 @@ self.addEventListener('fetch', function(event) {
           cache.put(event.request, response.clone());
           return response;
         })
+      }).catch(err => {
+        console.log('Assuming user is offline');
+        return new Response('Page not cached for offline use', {status: 503});
       });
     })
   );
