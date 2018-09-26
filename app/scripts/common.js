@@ -232,7 +232,7 @@ class Common {
   static handleFavButtonClick(event) {
     if (event.key) { //Keyboard event
       //Catch only spacebar and enter keys
-      if ((event.key != " ") && (event.key != "Enter")) return;
+      if ((event.key != ' ') && (event.key != 'Enter')) return;
       event.preventDefault();
     }
     const favButton = event.target || event.srcElement;
