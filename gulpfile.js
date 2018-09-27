@@ -31,10 +31,10 @@ gulp.task('styles', () => {
 
 gulp.task('scripts', ['sw'], () => {
   return gulp.src('app/scripts/**/*.js')
-    //.pipe($.plumber())
+    .pipe($.plumber())
     .pipe($.if(dev, $.sourcemaps.init()))
     .pipe($.babel())
-    //.pipe($.uglify({compress: {drop_console: true}}))
+    .pipe($.uglify({compress: {drop_console: true}}))
     .pipe($.if(dev, $.sourcemaps.write('.')))
     .pipe(gulp.dest('dist/js'))
     .pipe(reload({stream: true}));
@@ -43,9 +43,9 @@ gulp.task('scripts', ['sw'], () => {
 gulp.task('sw', () => {
   return gulp.src(['app/scripts/lib/idb.js', 'app/scripts/common.js', 'app/sw.js'])
     .pipe(concat('sw.js'))
-    //.pipe($.plumber())
+    .pipe($.plumber())
     .pipe($.babel())
-    //.pipe($.uglify({compress: {drop_console: true}}))
+    .pipe($.uglify({compress: {drop_console: true}}))
     .pipe(gulp.dest('dist'))
     .pipe(reload({stream: true}));
 });
@@ -71,12 +71,12 @@ gulp.task('lint:test', () => {
 gulp.task('html', ['styles', 'scripts'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
-    //.pipe($.if(/\.js$/, $.uglify({compress: {drop_console: false}})))
+    .pipe($.if(/\.js$/, $.uglify({compress: {drop_console: false}})))
     .pipe($.if(/\.css$/, $.cssnano({safe: true, autoprefixer: false})))
     .pipe($.if(/\.html$/, $.htmlmin({
       collapseWhitespace: true,
       minifyCSS: true,
-      //minifyJS: {compress: {drop_console: false}},
+      minifyJS: {compress: {drop_console: false}},
       processConditionalComments: true,
       removeComments: true,
       removeEmptyAttributes: true,
