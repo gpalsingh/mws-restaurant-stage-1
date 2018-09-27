@@ -355,6 +355,8 @@ h1.home-name {
 }
 .field-container {
   padding: 10px;
+  display: flex;
+  flex-flow: column;
 }
 .submit-container {
   padding: 10px;
