@@ -153,7 +153,11 @@ gulp.task('extras', () => {
   return gulp.src([
     'app/*',
     '!app/*.html',
-    '!app/sw.js'
+    '!app/sw.js',
+    '!app/icon',
+    '!app/images',
+    '!app/styles',
+    '!app/scripts'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
