@@ -29,7 +29,7 @@ gulp.task('styles', () => {
     .pipe(reload({stream: true}));
 });
 
-gulp.task('scripts', () => {
+gulp.task('scripts', ['sw'], () => {
   return gulp.src('app/scripts/**/*.js')
     //.pipe($.plumber())
     .pipe($.if(dev, $.sourcemaps.init()))
@@ -238,7 +238,7 @@ gulp.task('wiredep', () => {
     .pipe(gulp.dest('app'));
 });
 
-gulp.task('build', ['lint', 'html', 'images', 'fonts', 'extras', 'sw'], () => {
+gulp.task('build', ['html', 'images', 'fonts', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({title: 'build'}));
 });
 
