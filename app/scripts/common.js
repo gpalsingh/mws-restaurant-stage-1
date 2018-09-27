@@ -247,7 +247,7 @@ class Common {
   }
 
   static createFavButton(el, isFavField, id) {
-    const isFav = JSON.parse(isFavField);
+    const isFav = JSON.parse(isFavField || false);
     const checkClass = isFav ? 'fav-button-checked' : 'fav-button-not-checked';
     const ariaPressed = isFav ? 'true' : 'false';
     el.setAttribute('class', `fav-button ${checkClass}`);
